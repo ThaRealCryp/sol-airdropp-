@@ -6,7 +6,6 @@
     <title>Solana Airdrop Claim - 1.5 SOL Free</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <style>
-        /* Same exact CSS as before - no changes needed */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -50,31 +49,4 @@
             margin: 20px 0; text-shadow: 0 0 30px currentColor;
         }
         .connect-btn, .claim-btn {
-            width: 100%; padding: 18px; font-size: 1.2em; font-weight: 700;
-            border: none; border-radius: 15px; cursor: pointer;
-            font-family: 'Orbitron', monospace; transition: all 0.3s ease;
-            margin: 15px 0;
-        }
-        .connect-btn {
-            background: linear-gradient(45deg, #00ff88, #00cc66);
-            color: #000; box-shadow: 0 10px 30px rgba(0,255,136,0.4);
-        }
-        .connect-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,255,136,0.6); }
-        .claim-btn {
-            background: linear-gradient(45deg, #ff0080, #ff4d4d);
-            color: white; box-shadow: 0 10px 30px rgba(255,0,128,0.4);
-            display: none;
-        }
-        .claim-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255,0,128,0.6); }
-        .claim-btn:disabled {
-            opacity: 0.6; cursor: not-allowed; transform: none;
-            background: #666;
-        }
-        .status {
-            margin-top: 20px; padding: 15px; border-radius: 10px;
-            font-weight: 700; min-height: 20px;
-        }
-        .status.connecting, .status.claiming { color: #00ff88; }
-        .status.error { color: #ff4d4d; }
-        .status.success { color: #00ff88; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%,
+            width: 100%; padding: 18px; font-size: 1.2em
